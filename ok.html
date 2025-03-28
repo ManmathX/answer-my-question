@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Choices Game</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #game-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+        }
+
+        h1 {
+            color: #4a4a4a;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #score, #timer {
+            font-size: 1.2em;
+            margin: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            display: inline-block;
+            min-width: 120px;
+        }
+
+        button {
+            background-color: #6e8efb;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 25px;
+            margin: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            background-color: #5c7cfa;
+        }
+
+        #result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+
+        h2 {
+            color: #2c3e50;
+            margin: 20px 0;
+            font-size: 1.5em;
+        }
+
+        #reset {
+            background-color: #a777e3;
+            font-weight: bold;
+        }
+
+        #reset:hover {
+            background-color: #9666d3;
+        }
+
+        .correct {
+            color: #2ecc71;
+        }
+
+        .wrong {
+            color: #e74c3c;
+        }
+    </style>
+</head>
+<body>
+<audio src="background-music.mp3" autoplay loop></audio>
+    <div id="game-container">
+        <h1> Choices Game</h1>
+        <div id="score">Score: 0</div>
+        <div id="timer">Time: 30</div>
+        <div id="choices"></div>
+        <div id="result"></div>
+        <button id="reset" style="display: none;">Play Again</button>
+    </div>
+    <script>
+        let score = 0;
+        let timeLeft = 30;
+        let timerId;
+        let currentQuestionIndex = 0;
+
+        const questions = [
+            { question: "What is 2 + 2?", choices: ["3", "4", "5"], correct: "4" },
+            { question: "What is the capital of France?", choices: ["Berlin", "Paris", "Rome"], correct: "Paris" },
+            { question: "What is the color of the sky?", choices: ["Blue", "Green", "Red"], correct: "Blue" },
+            { question: "What is the largest planet in our solar system?", choices: ["Earth", "Jupiter", "Mars"], correct: "Jupiter" },
+            { question: "What is the boiling point of water?", choices: ["100°C", "90°C", "80°C"], correct: "100°C" },
+            { question: "What is the chemical symbol for gold?", choices: ["Au", "Ag", "Pb"], correct: "Au" }
+        ];
+
+        const choices = document.getElementById('choices');
+        const result = document.getElementById('result');
+        const resetButton = document.getElementById('reset');
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+
+        function startGame() {
+            score = 0;
+            timeLeft = 30;
+            currentQuestionIndex = 0;
+            scoreDisplay.innerHTML = `Score: ${score}`;
+            timerDisplay.innerHTML = `Time: ${timeLeft}`;
+            result.innerHTML = '';
+            resetButton.style.display = 'none';
+            displayQuestion();
+            startTimer();
+        }
+
+        function startTimer() {
+            timerId = setInterval(() => {
+                timeLeft--;
+                timerDisplay.innerHTML = `Time: ${timeLeft}`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerId);
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function displayQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                endGame();
+                return;
+            }
+            const question = questions[currentQuestionIndex];
+            choices.innerHTML = `
+                <h2>${question.question}</h2>
+                ${question.choices.map(choice => `<button onclick="makeChoice('${choice}')">${choice}</button>`).join('')}
+            `;
+        }
+
+        function makeChoice(choice) {
+            const question = questions[currentQuestionIndex];
+            if (choice === question.correct) {
+                result.innerHTML = 'Correct!';
+                score += 10;
+            } else {
+                endGame(); // End the game if the answer is wrong
+                return; // Prevent further execution
+            }
+            scoreDisplay.innerHTML = `Score: ${score}`;
+            currentQuestionIndex++;
+            if (currentQuestionIndex >= questions.length) {
+                endGame();
+            } else {
+                displayQuestion();
+            }
+        }
+
+        function endGame() {
+            if (currentQuestionIndex >= questions.length) {
+                result.innerHTML = 'Congratulations! You have completed all questions and won!';
+            } else {
+                result.innerHTML = 'Time is up! Game over!';
+            }
+            resetButton.style.display = 'block';
+            clearInterval(timerId);
+        }
+
+        resetButton.onclick = startGame;
+
+        // Start the game when the page loads
+        startGame();
+    </script>
+</body>
+</html>
